@@ -5,26 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/styles/styles.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <audio class= 'buttonSound' src="/sounds/shooting-sound-fx-159024.mp3"></audio>
+    <audio class="alarmSound"></audio>
     <title>StudyTime</title>
 </head>
 <body>
     <h1>Welcome to intense study time!</h1>
     <div id="stopwatch">
-        <h2>Pomodoro</h2>
+        <h1>Pomodoro</h2>
         <h2 id="studyTitle">Study Time</h2>
+
+        <label for="alarmSelection">Alarm: </label>
+        <select name="alarmSelection" id="alarmSelection">
+            <option value="chiptune" id="chiptune">Chiptune</option>
+            <option value="oversimplified" id="oversimplified">Oversimplified</option>
+            <option value="digitalAlarm" id="digitalAlarm">Digital Alarm Clock</option>
+            <option value="shortAlarm" id="shortAlarm">Short Alarm Clock</option>
+            <option value="alarmClock" id="alarmClock">Alarm Clock</option>
+        </select>
+
         <div>
             <button id="infinite">Infinite</button>
-            <button id="count_down">Count down</button>
+            <button id="count_down">Pomodoro</button>
+            <button id="short_break">Short Break</button>
+            <button id="long_break">Long Break</button>
+
         </div>
-        <div id="count_down_buttons">
-            <button id="increase_time">+</button>
-            <button id="decrease_time">-</button>
+        <div id="clockContainer">
+            <h1 id="time_value">25 : 00</h1>
+            <div id="count_down_buttons">
+                <button id="increase_time" class="adjustButtons">+</button>
+                <button id="decrease_time" class="adjustButtons">-</button>
+            </div>
         </div>
-        <p id="time_value">25 : 00</p>
+        
+        
         <button id="start_timer">Start</button>
         <button id="stop_timer">Stop</button>
         <button id="reset_button">Reset</button>
     </div>
+
+    <div id="quoteContainer">
+        <h2 id="quoteHeading">" <%= quotes %> "</h3>
+    </div>
+
+    <div id="summaryContainer">
+        <h2>Summary Table</h2>
+        <table id="summaryTable">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Summary</th>
+                    <th>Time</th>
+                    <th>Action</th>
+                </tr>
+                
+            </thead>
+        </table>
+    </div>
+
 
     <script type= 'module' src="/js/script.js"></script>
 </body>
