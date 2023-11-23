@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //1j: Add sounds to the buttons DONE
 //1k: Select alarm sound DONE
 //1l: Play alarm when timer finish DONE
-//1m: Delete summary row
+//1m: Delete summary row DONE
 //1m: When user selects sound, play sound until click on on outside of screen
 
 ///////////

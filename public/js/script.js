@@ -3,7 +3,7 @@ import * as quotes from "./quotes.js";
 
 //Initial load page
 time.pomodoroInit();
-quotes.fetchQuote();
+quotes.quoteInit();
 
 //button sounds
 $('button').click(function(){

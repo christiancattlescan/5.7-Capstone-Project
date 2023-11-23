@@ -3,12 +3,16 @@
 let myQuoteInterval;
 const url = "http://localhost:3000/get/quote";
 
+function quoteInit(){
+    fetchQuote();
+    runQuoteInterval(600000);
+}
+
 async function fetchQuote(){
     const result = await (axios.get(url));
     // console.log(result.data);
     let text = '"' +  result.data + '"';
     $('#quoteHeading').text(text);
-    runQuoteInterval(600000);
 }
 
 function runQuoteInterval(time){
@@ -16,7 +20,7 @@ function runQuoteInterval(time){
 }
 
 export {
-    fetchQuote,
+    quoteInit,
 };
 
 
