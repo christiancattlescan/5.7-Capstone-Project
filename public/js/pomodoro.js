@@ -2,7 +2,8 @@ let timer = {
     pomodoro: 25,
     shortBreak: 5,
     longBreak: 15,
-    // chosenTime: minutes, 
+    startTime: 0,
+    endTime: 0,
     clockRunning: false, //clock running if true - clock stopped if false
     timerEventList: {
         infinite: "infinite",
@@ -11,6 +12,7 @@ let timer = {
         longBreak: "longBreak",
     },
     remainingTime: {
+        hours: 0,
         minutes: 25,
         seconds: 0,
     }
@@ -18,12 +20,7 @@ let timer = {
 
 let myTimerInterval;
 let myTimerEvent = "pomodoro";
-let breakCounter = 3;
 let passedSchedule = false;
-
-function pomodoroInit(){
-    // $('#summaryContainer').hide();
-}
 
 function startTimer(){
     if(timer.clockRunning){
@@ -36,9 +33,12 @@ function startTimer(){
         case timer.timerEventList.pomodoro:
         case timer.timerEventList.shortBreak:
         case timer.timerEventList.longBreak:
+            timer.startTime = new Date().getTime();
+            timer.endTime = new Date().getTime() + (timer[myTimerEvent] * 60 * 1000);
             myTimerInterval = setInterval(timerCountDownFunction, 1000);
             break;
         case timer.timerEventList.infinite:
+            timer.startTime = new Date().getTime();
             myTimerInterval = setInterval(timerCountUpFunction, 1000);
             break;
         default:
@@ -55,6 +55,12 @@ function stopTimer(){
     }
     clearInterval(myTimerInterval);
     timer.clockRunning = false;
+    myTimerInterval = null;
+    stopAlarm();
+}
+
+function stopAlarm(){
+    $('.alarmSound').get(0).pause();
 }
 
 function playAlarm(){
@@ -76,31 +82,59 @@ function showSummaryTable(){
 }
 
 function getElapsedTime(){
+    let elapsedHour;
     let elapsedMinute;
     let elapsedSecond;
 
     if (myTimerEvent === timer.timerEventList.infinite){
+        elapsedHour = timer.remainingTime.hours;
         elapsedMinute = timer.remainingTime.minutes;
         elapsedSecond = timer.remainingTime.seconds;
     }else{
         if(passedSchedule){
-            elapsedMinute = timer[myTimerEvent] + timer.remainingTime.minutes;
-            elapsedSecond = timer.remainingTime.seconds;
+            let totalTime = timer[myTimerEvent] + timer.remainingTime.minutes + Math.floor(timer.remainingTime.hours/60);
+            elapsedHour = Math.floor(totalTime/60);
+            elapsedMinute = totalTime % 60;
+            elapsedSecond = 60 - timer.remainingTime.seconds;
             passedSchedule = false;
         }else{
-            elapsedMinute = Math.floor(((timer[myTimerEvent]*60) - (timer.remainingTime.minutes*60 + timer.remainingTime.seconds))/60);
-            elapsedSecond = 60 - timer.remainingTime.seconds;
+            let remainingTime = (timer.remainingTime.hours * 60 * 60)+(timer.remainingTime.minutes*60) + timer.remainingTime.seconds;
+            elapsedHour = Math.floor((((timer[myTimerEvent] * 60)-remainingTime)/60)/60);
+            elapsedMinute = Math.floor(((timer[myTimerEvent] * 60)-remainingTime)/60);
+            elapsedSecond = ((timer[myTimerEvent] * 60) - remainingTime)%60;
         }
     }
-    return String(elapsedMinute).padStart(2, '0') + ':' + String(elapsedSecond).padStart(2, '0');
+    return String(elapsedHour).padStart(2, '0') + ':' + String(elapsedMinute).padStart(2, '0') + ':' + String(elapsedSecond).padStart(2, '0');
 }
 
 function deleteRowButton(){
     $('#summaryContainer').on("click",'#deleteRowButton',function(){
-    
         $(this).closest('tr').remove(); 
-        console.log($(this).closest('tr'));
      });
+}
+
+function getBackgroundColor(){
+    switch(myTimerEvent){
+        case timer.timerEventList.pomodoro:
+            return "background-color: #FBA1B7";
+            break;
+        
+        case timer.timerEventList.infinite:
+            //infinite
+            return "background-color: #FFDBAA";
+            break;
+        
+        case timer.timerEventList.shortBreak:
+            return "background-color: #C8E4B2"
+            break;
+
+        case timer.timerEventList.longBreak:
+            return "background-color: #9ED2BE";
+            break;
+        
+        default:
+            console.log("error in getting background color");
+    }
 }
 
 function insertRow(){
@@ -114,28 +148,33 @@ function insertRow(){
     let typeCell = '<td>' + eventList[myTimerEvent] + '</td>';
     let summaryCell = '<td contenteditable="true"></td>';
     let timeCell ='<td>' + getElapsedTime() + '</td>' ;
-    let actionCell = '<td><button id="deleteRowButton">Delete Row</button></td>';
-    let markUp = '<tr>' + typeCell + summaryCell + timeCell + actionCell + '</tr>';
+    let actionCell = '<td><button id="deleteRowButton">Delete</button></td>';
+    let markUp = '<tr style= "' + getBackgroundColor() +'" >' + typeCell + summaryCell + timeCell + actionCell + '</tr>';
     table.append(markUp);
 }
 
 function resetTimer(){
     stopTimer();
-    showSummaryTable();
+    // showSummaryTable();
     insertRow();
     switchMode(myTimerEvent); //resets clock value
 }
 
 function updateClock(){
+    
     let timeValue = String(timer.remainingTime.minutes).padStart(2, '0') + ' : ' + String(timer.remainingTime.seconds).padStart(2, '0');
+    if(timer.remainingTime.hours >= 1 ){
+        timeValue = String(timer.remainingTime.hours).padStart(2, '0')  + ' : ' + timeValue;
+    }
     if(passedSchedule){
-        timeValue = '+ ' + timeValue;
+        timeValue = ' + ' + timeValue;
     }
     $('#time_value').text(timeValue);
 }
 
 function switchMode (newEvent){
     myTimerEvent = newEvent;
+    stopTimer();
     //switch from pomodoro time to break time or vice versa.
     switch(myTimerEvent){
         case timer.timerEventList.pomodoro:
@@ -143,6 +182,7 @@ function switchMode (newEvent){
             $('#studyTitle').text("Study Time");
             $('body').css({"background-color":"#FBA1B7"});
             myTimerEvent = "pomodoro";
+            timer.remainingTime.hours = 0;
             timer.remainingTime.minutes = timer.pomodoro;
             timer.remainingTime.seconds = 0;
             updateClock();
@@ -154,6 +194,7 @@ function switchMode (newEvent){
             $('#studyTitle').text("Study Time");
             $('body').css({"background-color":"#FFDBAA"});
             myTimerEvent = "infinite";
+            timer.remainingTime.hours = 0;
             timer.remainingTime.minutes = 0;
             timer.remainingTime.seconds = 0;
             updateClock();
@@ -163,6 +204,7 @@ function switchMode (newEvent){
             $('#studyTitle').text("Quick Break");
             $('body').css({"background-color":"#C8E4B2"});
             myTimerEvent = timer.timerEventList.shortBreak;
+            timer.remainingTime.hours = 0;
             timer.remainingTime.minutes = timer.shortBreak;
             timer.remainingTime.seconds = 0;
             updateClock();
@@ -172,6 +214,7 @@ function switchMode (newEvent){
             $('#studyTitle').text("Long Break time");
             $('body').css({"background-color":"#9ED2BE"});
             myTimerEvent = timer.timerEventList.longBreak;
+            timer.remainingTime.hours = 0;
             timer.remainingTime.minutes = timer.longBreak;
             timer.remainingTime.seconds = 0;
             updateClock();
@@ -182,54 +225,35 @@ function switchMode (newEvent){
     }
 }
 
-function checkIfBreakTime(){
+function timeDone(){
     stopTimer();
-    //if the currentevent is pomodoro, add 1 to breakCounter, switch to shortBreak
-    //if breakCounter == 3, switch to long break
-    if(myTimerEvent != timer.timerEventList.pomodoro){
-        switchMode(timer.timerEventList.pomodoro);
-        return
-    }
-
-    if (breakCounter >= 3){
-        switchMode(timer.timerEventList.longBreak);
-        breakCounter = 0;
-        return
-    }
-
-    breakCounter++;
-    switchMode(timer.timerEventList.shortBreak);
-
-}
-
-function passedScheduleTimer(){
+    playAlarm();
     passedSchedule = true;
-    stopTimer();
     timer.clockRunning = true;
+    timer.startTime = new Date().getTime();
     myTimerInterval = setInterval(timerCountUpFunction, 1000);
 }
 
 function timerCountDownFunction(){
-    timer.remainingTime.seconds--;
-    if (timer.remainingTime.seconds <= 0){
-        if(timer.remainingTime.minutes <= 0 && timer.remainingTime.seconds <= 0){
-            // checkIfBreakTime();
-            playAlarm();
-            passedScheduleTimer();
-        }else{
-            timer.remainingTime.minutes--;
-            timer.remainingTime.seconds = 59;
-        }
-    }    
+    //check if endTime === start time. If so, timer done
+    //if not, update remaining minutes and seconds
+    let elapsedTime = timer.endTime - new Date().getTime();  //in milliseconds
+    timer.remainingTime.hours = Math.floor(((elapsedTime / 1000) / 60) / 60);
+    timer.remainingTime.minutes = Math.floor((elapsedTime / 1000) / 60) % 60;
+    timer.remainingTime.seconds = Math.floor((elapsedTime / 1000) % 60);
     updateClock();
+    if (elapsedTime <= 0){
+        timeDone();
+        return
+    }
 }
 
 function timerCountUpFunction(){
-    timer.remainingTime.seconds++;
-    if (timer.remainingTime.seconds >= 60){
-        timer.remainingTime.minutes++;
-        timer.remainingTime.seconds = 0;
-    }
+    let currentTime = new Date().getTime();
+    let elapsedTime = currentTime - timer.startTime;
+    timer.remainingTime.hours = Math.floor(((elapsedTime / 1000) / 60) / 60);
+    timer.remainingTime.minutes = Math.floor((elapsedTime / 1000) / 60) % 60;
+    timer.remainingTime.seconds = Math.floor((elapsedTime / 1000) % 60);
     updateClock();
 }
 
@@ -238,14 +262,14 @@ function infiniteButton(){
     switchMode("infinite");
 }
 
-function countDownButton(){
+function pomodoroModeButton(){
     stopTimer();
     switchMode("pomodoro");
 }
 
 //Handles increase and decrease time value by 5
 function timeAdjust(setting){
-    switchMode(myTimerEvent);   //reset time to original settings
+    // switchMode(myTimerEvent);   //reset time to original settings
     let timeSetting = setting;
     if (timeSetting === "increase"){
         //find which time user wants to adjust (pomodoro)
@@ -278,9 +302,8 @@ function decreaseTime(){
     timeAdjust("decrease");
 }
 export {
-    deleteRowButton,
-    pomodoroInit, 
+    deleteRowButton, 
     startTimer, 
     stopTimer, 
     resetTimer, 
-    playAlarm ,infiniteButton, increaseTime, decreaseTime, countDownButton as setAsCountDown, switchMode};
+    playAlarm ,infiniteButton, increaseTime, decreaseTime, pomodoroModeButton as setAsCountDown, switchMode};

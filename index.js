@@ -24,6 +24,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //1l: Play alarm when timer finish DONE
 //1m: Delete summary row DONE
 //1m: When user selects sound, play sound until click on on outside of screen
+//1o: Color the table row with the color that the background is DONE
+//1p: Change logic if timer to be using clock instead. It's somehow getting stuck at times. DONE
+//1q: When clicking stop, it stops music as well DONE
+//1r: Calculate total time for each type - need database maybe or saving it somewhere
 
 ///////////
 //To do 2: Get quotes displayed  
@@ -37,6 +41,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 ///////////
 
 //To do 5: use bootstrap or react to make it look nice
+
+//To do 6: API with Journey to log all these summary
 
 const url = "https://favqs.com/api/qotd"
 

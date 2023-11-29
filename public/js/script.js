@@ -2,7 +2,6 @@ import * as time from "./pomodoro.js";
 import * as quotes from "./quotes.js";
 
 //Initial load page
-time.pomodoroInit();
 quotes.quoteInit();
 
 //button sounds
