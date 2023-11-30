@@ -63,3 +63,7 @@ th {
     /* width: 15px; */
     margin: 2em;
 }
+
+.studied{
+    display: flex;
+}

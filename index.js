@@ -44,6 +44,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 //To do 6: API with Journey to log all these summary
 
+//To do 7: Use cookies to save progress for a bit
+
 const url = "https://favqs.com/api/qotd"
 
 app.get("/", async(req, res)=>{
